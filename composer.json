@@ -1,0 +1,23 @@
+{
+    "name": "drewm/drip",
+    "description": "PHP library for interacting with the Drip API",
+    "license": "MIT",
+    "keywords": ["drip"],
+    "authors": [
+        {
+            "name": "Drew McLellan",
+            "email": "drew.mclellan@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "DrewM\\Drip\\": "src"
+        }
+    }
+}
