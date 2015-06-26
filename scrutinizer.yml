@@ -1,0 +1,12 @@
+# .scrutinizer.yml
+checks:
+    php:
+        code_rating: true
+        duplication: true
+
+filter:
+    excluded_paths:
+        - tests/*
+        - vendor/*
+    paths:
+        - src/*
