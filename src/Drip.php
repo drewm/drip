@@ -4,7 +4,13 @@ namespace DrewM\Drip;
 
 class Drip
 {
+	private static $eventSubscriptions = [];
 
+	public static function subscribeToWebhook($event, callable $callback)
+	{
+		if (!isset($eventSubscriptions[$event])) $eventSubscriptions[$event] = [];
+		self::$eventSubscriptions[$event][] = $callback;
+	}
 
 	public static function receiveWebhook($input=null)
 	{
@@ -13,9 +19,23 @@ class Drip
 		}
 
 		if ($input) {
-			return json_decode($input, true);	
+			$result = json_decode($input, true);
+			if ($result && isset($result['event'])) {
+				self::disptachWebhookEvent($result['event'], $result['data']);
+				return $result;
+			}
 		}		
 		
+		return false;
+	}
+
+	private static function disptachWebhookEvent($event, $data)
+	{
+		if (isset(self::$eventSubscriptions[$event])) {
+			foreach(self::$eventSubscriptions[$event] as $callback) {
+				$callback($data);
+			}
+		}
 		return false;
 	}
 }
