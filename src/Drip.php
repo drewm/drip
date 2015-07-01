@@ -8,7 +8,7 @@ class Drip
 
 	public static function subscribeToWebhook($event, callable $callback)
 	{
-		if (!isset($eventSubscriptions[$event])) $eventSubscriptions[$event] = [];
+		if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = [];
 		self::$eventSubscriptions[$event][] = $callback;
 	}
 
