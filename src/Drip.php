@@ -35,6 +35,8 @@ class Drip
 			foreach(self::$eventSubscriptions[$event] as $callback) {
 				$callback($data);
 			}
+			// reset subscriptions
+			self::$eventSubscriptions[$event] = [];
 		}
 		return false;
 	}
