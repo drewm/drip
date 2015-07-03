@@ -23,15 +23,18 @@ Create a new Drip object with
 
 ```php
 use DrewM\Drip\Drip;
+use DrewM\Drip\Dataset;
+
 $Drip = new Drip('abc123', '1234567')
 ```
 
 Create a new subscriber:
 
 ```php
-$result = $Drip->post('subscribers', [
+$data = new Dataset('subscribers', [
 				'email' => 'postmaster@example.com',
 			]);
+$result = $Drip->post('subscribers', $data);
 ```
 
 List all subscribers:
