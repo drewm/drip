@@ -77,7 +77,7 @@ class Drip
 
 	private function makeRequest($http_verb='post', $api_method, $args=array(), $timeout=10)
 	{
-		$url 	   = $this->api_endpoint.'/'.$this->accountID.'/'.$method;
+		$url = $this->api_endpoint.'/'.$this->accountID.'/'.$api_method;
         
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
 
@@ -101,7 +101,7 @@ class Drip
 					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($args)); 
 					break;
 
-				case 'get' :
+				case 'get':
 					$query = http_build_query($args);
 					curl_setopt($ch, CURLOPT_URL, $url.'?'.$query);
 					break;
@@ -119,7 +119,5 @@ class Drip
 		}else{
 			throw new Exception("cURL support is required, but can't be found.", 1);
 		}
-
-		return false;
 	}
 }
