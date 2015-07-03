@@ -4,7 +4,34 @@ namespace DrewM\Drip;
 
 class Drip
 {
+	private $api_endpoint = 'https://api.getdrip.com/v2';
+
 	private static $eventSubscriptions = [];
+	
+	private $token      = false;
+	private $accountID  = false;
+	private $verify_ssl = true;
+
+	public function __construct($token, $accountID)
+	{
+		$this->token     = $token;
+		$this->accountID = $accountID;
+	}
+
+	public function post($api_method, $args, $timeout=10)
+	{
+		return $this->makeRequest('post', $api_method, $args, $timeout);
+	}
+
+	public function get($api_method, $args, $timeout=10)
+	{
+		return $this->makeRequest('get', $api_method, $args, $timeout);
+	}
+
+	public function disableSSLVerification()
+	{
+		$this->verify_ssl = false;
+	}
 
 	public static function subscribeToWebhook($event, callable $callback)
 	{
@@ -38,6 +65,54 @@ class Drip
 			// reset subscriptions
 			self::$eventSubscriptions[$event] = [];
 		}
+		return false;
+	}
+
+	private function makeRequest($http_verb='post', $api_method, $args=array(), $timeout=10)
+	{
+		$url 	   = $this->api_endpoint.'/'.$this->accountID.'/'.$method;
+        
+        if (function_exists('curl_init') && function_exists('curl_setopt')) {
+
+			$ch = curl_init(); 
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+			curl_setopt($ch, CURLOPT_HTTPHEADER, [
+												'Accept: application/vnd.api+json',
+												'Content-Type: application/vnd.api+json',
+											]); 
+			curl_setopt($ch, CURLOPT_USERAGENT, 'DrewM/Drip (github.com/drewm/drip)');
+			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC); 
+			curl_setopt($ch, CURLOPT_USERPWD, $this->token.': '); 
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
+			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+
+			switch($http_verb) {
+				case 'post':
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_POST, 1);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($args)); 
+					break;
+
+				case 'get' :
+					$query = http_build_query($args);
+					curl_setopt($ch, CURLOPT_URL, $url.'?'.$query);
+					break;
+
+				default:
+					curl_setopt($ch, CURLOPT_URL, $url); 
+					break;
+			}
+
+
+		    $result = curl_exec($ch); 
+		    curl_close($ch); 
+
+		    return $result ? json_decode($result, true) : false;
+		}else{
+			throw new Exception("cURL support is required, but can't be found.", 1);
+		}
+
 		return false;
 	}
 }
