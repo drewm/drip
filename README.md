@@ -15,16 +15,15 @@ composer require drewm/drip
 
 ## Make a simple request
 
+Create a new Drip object with 
+
+1. Your user's API token (Settings > My User Settings > API Token)
+2. Your numeric account ID (Log into the Drip dashboard and it's the first segment in your URL)
+
 ```php
 use DrewM\Drip\Drip;
-
-// Create a new Drip object with 
-// 1) Your user's API token
-// 2) Your account ID
-
 $Drip = new Drip('abc123', '1234567')
-
-// Make a call
+```
 
 Create a new subscriber:
 
@@ -39,6 +38,7 @@ List all subscribers:
 ```php
 $result = $Drip->get('subscribers');
 ```
+
 
 ## Webhooks
 
