@@ -7,6 +7,7 @@ class Drip
 	private $api_endpoint = 'https://api.getdrip.com/v2';
 
 	private static $eventSubscriptions = [];
+	private static $receivedWebhook = false;
 	
 	private $token      = false;
 	private $accountID  = false;
@@ -37,6 +38,11 @@ class Drip
 	{
 		if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = [];
 		self::$eventSubscriptions[$event][] = $callback;
+
+		// For subscribers registered after the webhook has been received:
+		if (self::$receivedWebhook!==false) {
+			self::receiveWebhook(self::$receivedWebhook);
+		} 
 	}
 
 	public static function receiveWebhook($input=null)
@@ -46,6 +52,7 @@ class Drip
 		}
 
 		if ($input) {
+			self::$receivedWebhook = $input;
 			$result = json_decode($input, true);
 			if ($result && isset($result['event'])) {
 				self::disptachWebhookEvent($result['event'], $result['data']);

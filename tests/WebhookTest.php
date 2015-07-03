@@ -28,6 +28,19 @@ class WebhookTest extends PHPUnit_Framework_TestCase
 	}
 
 
+	/**
+     * @dataProvider webhookProvider
+     */
+	public function testWebhookSubscriptionOutOfSequence($event_name, $event_json, $event_array)
+	{
+		Drip::receiveWebhook($event_json);
+
+		$mock = $this->getMock('stdClass', array('myCallBack'));
+		$mock->expects($this->once())->method('myCallBack')->with($this->equalTo($event_array['data']));
+
+		Drip::subscribeToWebhook($event_name, [$mock, 'myCallBack']);
+	}
+
 
 	public function webhookProvider()
 	{
