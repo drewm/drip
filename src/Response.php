@@ -16,10 +16,14 @@ class Response
 			$this->status = (int) $meta['http_code'];	
 		}
 		
-		$this->data = json_decode($body, true);
-
+		$decoded_body = json_decode($body, true); 
+		if (is_array($decoded_body)) {
+			$this->data = $decoded_body;	
+		}
+		
 		if (is_array($this->data) && isset($this->data['errors'])) {
-			$this->assign_errors();
+			$this->error = $this->data['errors'][0]['code'];
+			$this->message = $this->data['errors'][0]['message'];
 		}
 	}	
 
@@ -44,16 +48,5 @@ class Response
 
 	public function __debugInfo() {
 		return $this->data;
-	}
-
-	private function assign_errors()
-	{
-		if (isset($this->data['errors'][0]['code'])) {
-			$this->error = $this->data['errors'][0]['code'];
-		}
-
-		if (isset($this->data['errors'][0]['message'])) {
-			$this->message = $this->data['errors'][0]['message'];
-		}
 	}
 }
