@@ -34,15 +34,34 @@ Create a new subscriber:
 $data = new Dataset('subscribers', [
 				'email' => 'postmaster@example.com',
 			]);
-$result = $Drip->post('subscribers', $data);
+$Response = $Drip->post('subscribers', $data);
 ```
 
 List all subscribers:
 
 ```php
-$result = $Drip->get('subscribers');
+$Response = $Drip->get('subscribers');
 ```
 
+## Handling responses
+
+Methods return a Response object
+
+```php
+if ($Response->status == 200) {
+	// all is ok!
+	$subscribers = $Response->subscribers;
+} else {
+	echo $Response->error;
+	echo $Response->message;
+}
+```
+
+Get the raw response:
+
+```php
+$raw = $Response->get();
+```
 
 ## Webhooks
 

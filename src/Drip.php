@@ -113,11 +113,21 @@ class Drip
 
 
 		    $result = curl_exec($ch); 
+
+		    if(!curl_errno($ch)) {
+			 	$info = curl_getinfo($ch);
+			 	curl_close($ch);
+			 	return new Response($info, $result);
+			}
+
+			$errno = curl_errno($ch);
+			$error = curl_error($ch);
+
 		    curl_close($ch); 
 
-		    return $result ? json_decode($result, true) : false;
+		    throw new \Exception($error, $errno);
 		}else{
-			throw new Exception("cURL support is required, but can't be found.", 1);
+			throw new \Exception("cURL support is required, but can't be found.", 1);
 		}
 	}
 }
