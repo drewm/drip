@@ -12,20 +12,10 @@ class Response
 
 	public function __construct($meta, $body)
 	{
-		if (isset($meta['http_code'])) {
-			$this->status = (int) $meta['http_code'];	
-		}
-		
-		$decoded_body = json_decode($body, true); 
-		if (is_array($decoded_body)) {
-			$this->data = $decoded_body;	
-		}
-		
-		if (is_array($this->data) && isset($this->data['errors'])) {
-			$this->error = $this->data['errors'][0]['code'];
-			$this->message = $this->data['errors'][0]['message'];
-		}
-	}	
+		$this->process_meta($meta);
+		$this->process_body($body);
+		$this->handle_errors();
+	}
 
 	public function __get($name)
 	{
@@ -48,5 +38,28 @@ class Response
 
 	public function __debugInfo() {
 		return $this->data;
+	}
+
+	private function process_meta($meta)
+	{
+		if (isset($meta['http_code'])) {
+			$this->status = (int) $meta['http_code'];	
+		}
+	}
+
+	private function process_body($body)
+	{
+		$decoded_body = json_decode($body, true); 
+		if (is_array($decoded_body)) {
+			$this->data = $decoded_body;	
+		}
+	}
+
+	private function handle_errors()
+	{
+		if (is_array($this->data) && isset($this->data['errors'])) {
+			$this->error = $this->data['errors'][0]['code'];
+			$this->message = $this->data['errors'][0]['message'];
+		}
 	}
 }
