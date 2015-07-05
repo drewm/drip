@@ -29,7 +29,7 @@ class Drip
 		return $this->makeRequest('get', $api_method, $args, $timeout);
 	}
 
-	public function delete($api_method, $args, $timeout=10)
+	public function delete($api_method, $args=array(), $timeout=10)
 	{
 		return $this->makeRequest('delete', $api_method, $args, $timeout);
 	}
