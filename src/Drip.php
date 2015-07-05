@@ -98,10 +98,10 @@ class Drip
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
 			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+			curl_setopt($ch, CURLOPT_URL, $url);
 
 			switch($http_verb) {
 				case 'post':
-					curl_setopt($ch, CURLOPT_URL, $url);
 					curl_setopt($ch, CURLOPT_POST, 1);
 					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($args)); 
 					break;
@@ -111,20 +111,8 @@ class Drip
 					curl_setopt($ch, CURLOPT_URL, $url.'?'.$query);
 					break;
 
-				case 'put':
-					$query = http_build_query($args);
-					curl_setopt($ch, CURLOPT_URL, $url);
-			        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-			        curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
-					break;
-
 				case 'delete':
-					curl_setopt($ch, CURLOPT_URL, $url);
 					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-					break;
-
-				default:
-					curl_setopt($ch, CURLOPT_URL, $url); 
 					break;
 			}
 
