@@ -29,6 +29,11 @@ class Drip
 		return $this->makeRequest('get', $api_method, $args, $timeout);
 	}
 
+	public function delete($api_method, $args, $timeout=10)
+	{
+		return $this->makeRequest('delete', $api_method, $args, $timeout);
+	}
+
 	public function disableSSLVerification()
 	{
 		$this->verify_ssl = false;
@@ -104,6 +109,18 @@ class Drip
 				case 'get':
 					$query = http_build_query($args);
 					curl_setopt($ch, CURLOPT_URL, $url.'?'.$query);
+					break;
+
+				case 'put':
+					$query = http_build_query($args);
+					curl_setopt($ch, CURLOPT_URL, $url);
+			        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+			        curl_setopt($ch, CURLOPT_POSTFIELDS, $query);
+					break;
+
+				case 'delete':
+					curl_setopt($ch, CURLOPT_URL, $url);
+					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
 					break;
 
 				default:
