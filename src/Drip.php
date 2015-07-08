@@ -44,18 +44,28 @@ class Drip
 		if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = [];
 		self::$eventSubscriptions[$event][] = $callback;
 
-		// For subscribers registered after the webhook has been received:
-		if (self::$receivedWebhook!==false) {
-			self::receiveWebhook(self::$receivedWebhook);
-		} 
+		self::receiveWebhook();
 	}
 
 	public static function receiveWebhook($input=null)
 	{
 		if (is_null($input)) {
-			$input = file_get_contents("php://input");	
+			if (self::$receivedWebhook!==false) {
+				$input = self::$receivedWebhook;
+			} else {
+				$input = file_get_contents("php://input");
+			}
 		}
 
+		if ($input) {
+			return self::processWebhook($input);
+		}	
+		
+		return false;
+	}
+
+	private static function processWebhook($input) 
+	{
 		if ($input) {
 			self::$receivedWebhook = $input;
 			$result = json_decode($input, true);
@@ -63,8 +73,8 @@ class Drip
 				self::disptachWebhookEvent($result['event'], $result['data']);
 				return $result;
 			}
-		}		
-		
+		}
+
 		return false;
 	}
 
@@ -115,7 +125,6 @@ class Drip
 					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
 					break;
 			}
-
 
 		    $result = curl_exec($ch); 
 

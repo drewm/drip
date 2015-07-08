@@ -84,6 +84,4 @@ Drip::subscribeToWebhook('subscriber.created', function($data){
 Drip::subscribeToWebhook('subscriber.subscribed_to_campaign', function($data){
 	// A subscriber was added to a campaign
 });
-
-Drip::receiveWebhook();
 ```
