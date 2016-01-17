@@ -70,7 +70,7 @@ class Drip
 			self::$receivedWebhook = $input;
 			$result = json_decode($input, true);
 			if ($result && isset($result['event'])) {
-				self::disptachWebhookEvent($result['event'], $result['data']);
+				self::dispatchWebhookEvent($result['event'], $result['data']);
 				return $result;
 			}
 		}
@@ -78,7 +78,7 @@ class Drip
 		return false;
 	}
 
-	private static function disptachWebhookEvent($event, $data)
+	private static function dispatchWebhookEvent($event, $data)
 	{
 		if (isset(self::$eventSubscriptions[$event])) {
 			foreach(self::$eventSubscriptions[$event] as $callback) {
