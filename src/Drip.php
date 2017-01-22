@@ -24,7 +24,7 @@ class Drip
 		return $this->makeRequest('post', $api_method, $args, $timeout);
 	}
 
-	public function get($api_method, $args, $timeout=10)
+	public function get($api_method, $args=array(), $timeout=10)
 	{
 		return $this->makeRequest('get', $api_method, $args, $timeout);
 	}
