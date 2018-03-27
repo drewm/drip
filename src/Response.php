@@ -8,7 +8,7 @@ class Response
 	public $error   = null;
 	public $message = null;
 
-	private $data   = [];
+	protected $data   = [];
 
 	public function __construct($meta, $body)
 	{
@@ -40,14 +40,14 @@ class Response
 		return $this->data;
 	}
 
-	private function process_meta($meta)
+	protected function process_meta($meta)
 	{
 		if (isset($meta['http_code'])) {
 			$this->status = (int) $meta['http_code'];	
 		}
 	}
 
-	private function process_body($body)
+	protected function process_body($body)
 	{
 		$decoded_body = json_decode($body, true); 
 		if (is_array($decoded_body)) {
@@ -55,7 +55,7 @@ class Response
 		}
 	}
 
-	private function handle_errors()
+	protected function handle_errors()
 	{
 		if (is_array($this->data) && isset($this->data['errors'])) {
 			$this->error = $this->data['errors'][0]['code'];
