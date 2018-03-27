@@ -4,14 +4,14 @@ namespace DrewM\Drip;
 
 class Drip
 {
-	private $api_endpoint = 'https://api.getdrip.com/v2';
+	protected $api_endpoint = 'https://api.getdrip.com/v2';
 
-	private static $eventSubscriptions = [];
-	private static $receivedWebhook = false;
+	protected static $eventSubscriptions = [];
+	protected static $receivedWebhook = false;
 	
-	private $token      = false;
-	private $accountID  = false;
-	private $verify_ssl = true;
+	protected $token      = false;
+	protected $accountID  = false;
+	protected $verify_ssl = true;
 
 	public function __construct($token, $accountID)
 	{
@@ -64,7 +64,7 @@ class Drip
 		return false;
 	}
 
-	private static function processWebhook($input) 
+	protected static function processWebhook($input) 
 	{
 		if ($input) {
 			self::$receivedWebhook = $input;
@@ -78,7 +78,7 @@ class Drip
 		return false;
 	}
 
-	private static function dispatchWebhookEvent($event, $data)
+	protected static function dispatchWebhookEvent($event, $data)
 	{
 		if (isset(self::$eventSubscriptions[$event])) {
 			foreach(self::$eventSubscriptions[$event] as $callback) {
@@ -90,11 +90,11 @@ class Drip
 		return false;
 	}
 
-	private function makeRequest($http_verb='post', $api_method, $args=array(), $timeout=10)
+	protected function makeRequest($http_verb='post', $api_method, $args=array(), $timeout=10)
 	{
 		$url = $this->api_endpoint.'/'.$this->accountID.'/'.$api_method;
         
-        if (function_exists('curl_init') && function_exists('curl_setopt')) {
+		if (function_exists('curl_init') && function_exists('curl_setopt')) {
 
 			$ch = curl_init(); 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
