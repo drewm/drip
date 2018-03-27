@@ -1,8 +1,6 @@
 # Drip
 PHP library for making token-based API requests against Drip.
 
-**I'm only just getting started here**
-
 [![Build Status](https://travis-ci.org/drewm/drip.svg)](https://travis-ci.org/drewm/drip)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/drewm/drip/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/drewm/drip/?branch=master)
 
