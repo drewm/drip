@@ -2,8 +2,10 @@
  
 use DrewM\Drip\Drip;
 use DrewM\Drip\Dataset;
+use PHPUnit\Framework\TestCase;
+
  
-class DatasetTest extends PHPUnit_Framework_TestCase 
+class DatasetTest extends TestCase
 {
 
 	public function testJsonSerialization()

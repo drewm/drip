@@ -2,8 +2,10 @@
  
 use DrewM\Drip\Drip;
 use DrewM\Drip\Batch;
+use PHPUnit\Framework\TestCase;
+
  
-class BatchTest extends PHPUnit_Framework_TestCase 
+class BatchTest extends TestCase
 {
 
 	public function testJsonSerialization()

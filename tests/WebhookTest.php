@@ -1,8 +1,10 @@
 <?php
  
 use DrewM\Drip\Drip;
+use PHPUnit\Framework\TestCase;
+
  
-class WebhookTest extends PHPUnit_Framework_TestCase 
+class WebhookTest extends TestCase
 {
 
 	/**
@@ -20,7 +22,7 @@ class WebhookTest extends PHPUnit_Framework_TestCase
      */
 	public function testWebhookSubscription($event_name, $event_json, $event_array)
 	{
-		$mock = $this->getMock('stdClass', array('myCallBack'));
+		$mock = $this->getMockBuilder('stdClass')->setMethods(['myCallBack'])->getMock();
 		$mock->expects($this->once())->method('myCallBack')->with($this->equalTo($event_array['data']));
 
 		Drip::subscribeToWebhook($event_name, [$mock, 'myCallBack']);
@@ -35,7 +37,7 @@ class WebhookTest extends PHPUnit_Framework_TestCase
 	{
 		Drip::receiveWebhook($event_json);
 
-		$mock = $this->getMock('stdClass', array('myCallBack'));
+		$mock = $this->getMockBuilder('stdClass')->setMethods(['myCallBack'])->getMock();
 		$mock->expects($this->once())->method('myCallBack')->with($this->equalTo($event_array['data']));
 
 		Drip::subscribeToWebhook($event_name, [$mock, 'myCallBack']);
