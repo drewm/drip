@@ -8,7 +8,7 @@ class Drip
     protected static $receivedWebhook    = false;
     protected        $api_endpoint       = 'https://api.getdrip.com/v2';
     protected        $token              = false;
-    protected        $accountID          = false;
+    protected        $accountID          = null;
     protected        $verify_ssl         = true;
 
     /**
@@ -121,9 +121,7 @@ class Drip
      */
     protected function makeRequest($http_verb, $api_method, $args = [], $timeout = 10, $url = null) : Response
     {
-        if ($url === null) {
-            $url = $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
-        }
+        $url = $this->constructRequestUrl($url, $api_method);
 
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
 
@@ -174,6 +172,26 @@ class Drip
         } else {
             throw new DripException("cURL support is required, but can't be found.", 1);
         }
+    }
+
+    /**
+     * @param string|null $url
+     * @param string $api_method
+     *
+     * @return string
+     * @throws DripException
+     */
+    private function constructRequestUrl($url, $api_method) : string
+    {
+        if ($url !== null) {
+            return $url;
+        }
+
+        if ($this->accountID === null) {
+            throw new DripException("This method requires an account ID and none has been set.", 2);
+        }
+
+        return $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
     }
 
     /**
