@@ -155,6 +155,22 @@ class Drip
     }
 
     /**
+     * Make a GET request to a top-level method outside of this account
+     *
+     * @param string $api_method
+     * @param array  $args
+     * @param int    $timeout
+     *
+     * @return Response
+     * @throws DripException
+     */
+    public function getGlobal($api_method, $args = [], $timeout = 10)
+    {
+        $url = $this->api_endpoint . '/' . $api_method;
+        return $this->makeRequest('get', $api_method, $args, $timeout, $url);
+    }
+
+    /**
      * Make a POST request
      *
      * @param string $api_method API method
