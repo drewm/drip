@@ -11,10 +11,19 @@ class Drip
     protected        $accountID          = false;
     protected        $verify_ssl         = true;
 
-    public function __construct($token, $accountID)
+    /**
+     * Drip constructor.
+     *
+     * @param string      $token     API Token
+     * @param string|null $accountID Drip account ID to operate on
+     */
+    public function __construct($token, $accountID = null)
     {
-        $this->token     = $token;
-        $this->accountID = $accountID;
+        $this->token = $token;
+
+        if ($accountID !== null) {
+            $this->accountID = $accountID;
+        }
     }
 
     public static function subscribeToWebhook($event, callable $callback)
@@ -68,6 +77,19 @@ class Drip
             self::$eventSubscriptions[$event] = [];
         }
         return false;
+    }
+
+    /**
+     * Set account ID if it was not passed into the constructor
+     *
+     * @param string $accountID
+     *
+     * @return bool
+     */
+    public function setAccountId($accountID) : bool
+    {
+        $this->accountID = $accountID;
+        return true;
     }
 
     /**
