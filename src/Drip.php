@@ -4,144 +4,144 @@ namespace DrewM\Drip;
 
 class Drip
 {
-	protected $api_endpoint = 'https://api.getdrip.com/v2';
+    protected static $eventSubscriptions = [];
+    protected static $receivedWebhook    = false;
+    protected $api_endpoint = 'https://api.getdrip.com/v2';
+    protected $token      = false;
+    protected $accountID  = false;
+    protected $verify_ssl = true;
 
-	protected static $eventSubscriptions = [];
-	protected static $receivedWebhook = false;
-	
-	protected $token      = false;
-	protected $accountID  = false;
-	protected $verify_ssl = true;
+    public function __construct($token, $accountID)
+    {
+        $this->token     = $token;
+        $this->accountID = $accountID;
+    }
 
-	public function __construct($token, $accountID)
-	{
-		$this->token     = $token;
-		$this->accountID = $accountID;
-	}
+    public static function subscribeToWebhook($event, callable $callback)
+    {
+        if (!isset(self::$eventSubscriptions[$event])) {
+            self::$eventSubscriptions[$event] = [];
+        }
+        self::$eventSubscriptions[$event][] = $callback;
 
-	public function post($api_method, $args, $timeout=10)
-	{
-		return $this->makeRequest('post', $api_method, $args, $timeout);
-	}
+        self::receiveWebhook();
+    }
 
-	public function get($api_method, $args=array(), $timeout=10)
-	{
-		return $this->makeRequest('get', $api_method, $args, $timeout);
-	}
+    public static function receiveWebhook($input = null)
+    {
+        if (is_null($input)) {
+            if (self::$receivedWebhook !== false) {
+                $input = self::$receivedWebhook;
+            } else {
+                $input = file_get_contents("php://input");
+            }
+        }
 
-	public function delete($api_method, $args=array(), $timeout=10)
-	{
-		return $this->makeRequest('delete', $api_method, $args, $timeout);
-	}
+        if ($input) {
+            return self::processWebhook($input);
+        }
 
-	public function disableSSLVerification()
-	{
-		$this->verify_ssl = false;
-	}
+        return false;
+    }
 
-	public static function subscribeToWebhook($event, callable $callback)
-	{
-		if (!isset(self::$eventSubscriptions[$event])) self::$eventSubscriptions[$event] = [];
-		self::$eventSubscriptions[$event][] = $callback;
+    protected static function processWebhook($input)
+    {
+        if ($input) {
+            self::$receivedWebhook = $input;
+            $result                = json_decode($input, true);
+            if ($result && isset($result['event'])) {
+                self::dispatchWebhookEvent($result['event'], $result['data']);
+                return $result;
+            }
+        }
 
-		self::receiveWebhook();
-	}
+        return false;
+    }
 
-	public static function receiveWebhook($input=null)
-	{
-		if (is_null($input)) {
-			if (self::$receivedWebhook!==false) {
-				$input = self::$receivedWebhook;
-			} else {
-				$input = file_get_contents("php://input");
-			}
-		}
+    protected static function dispatchWebhookEvent($event, $data)
+    {
+        if (isset(self::$eventSubscriptions[$event])) {
+            foreach (self::$eventSubscriptions[$event] as $callback) {
+                $callback($data);
+            }
+            // reset subscriptions
+            self::$eventSubscriptions[$event] = [];
+        }
+        return false;
+    }
 
-		if ($input) {
-			return self::processWebhook($input);
-		}	
-		
-		return false;
-	}
+    public function post($api_method, $args, $timeout = 10)
+    {
+        return $this->makeRequest('post', $api_method, $args, $timeout);
+    }
 
-	protected static function processWebhook($input) 
-	{
-		if ($input) {
-			self::$receivedWebhook = $input;
-			$result = json_decode($input, true);
-			if ($result && isset($result['event'])) {
-				self::dispatchWebhookEvent($result['event'], $result['data']);
-				return $result;
-			}
-		}
+    protected function makeRequest($http_verb = 'post', $api_method, $args = [], $timeout = 10)
+    {
+        $url = $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
 
-		return false;
-	}
+        if (function_exists('curl_init') && function_exists('curl_setopt')) {
 
-	protected static function dispatchWebhookEvent($event, $data)
-	{
-		if (isset(self::$eventSubscriptions[$event])) {
-			foreach(self::$eventSubscriptions[$event] as $callback) {
-				$callback($data);
-			}
-			// reset subscriptions
-			self::$eventSubscriptions[$event] = [];
-		}
-		return false;
-	}
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Accept: application/vnd.api+json',
+                'Content-Type: application/vnd.api+json',
+            ]);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'DrewM/Drip (github.com/drewm/drip)');
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD, $this->token . ': ');
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+            curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+            curl_setopt($ch, CURLOPT_URL, $url);
 
-	protected function makeRequest($http_verb='post', $api_method, $args=array(), $timeout=10)
-	{
-		$url = $this->api_endpoint.'/'.$this->accountID.'/'.$api_method;
-        
-		if (function_exists('curl_init') && function_exists('curl_setopt')) {
+            switch ($http_verb) {
+                case 'post':
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($args));
+                    break;
 
-			$ch = curl_init(); 
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-			curl_setopt($ch, CURLOPT_HTTPHEADER, [
-												'Accept: application/vnd.api+json',
-												'Content-Type: application/vnd.api+json',
-											]); 
-			curl_setopt($ch, CURLOPT_USERAGENT, 'DrewM/Drip (github.com/drewm/drip)');
-			curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC); 
-			curl_setopt($ch, CURLOPT_USERPWD, $this->token.': '); 
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
-			curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-			curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-			curl_setopt($ch, CURLOPT_URL, $url);
+                case 'get':
+                    $query = http_build_query($args);
+                    curl_setopt($ch, CURLOPT_URL, $url . '?' . $query);
+                    break;
 
-			switch($http_verb) {
-				case 'post':
-					curl_setopt($ch, CURLOPT_POST, 1);
-					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($args)); 
-					break;
+                case 'delete':
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                    break;
+            }
 
-				case 'get':
-					$query = http_build_query($args);
-					curl_setopt($ch, CURLOPT_URL, $url.'?'.$query);
-					break;
+            $result = curl_exec($ch);
 
-				case 'delete':
-					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-					break;
-			}
+            if (!curl_errno($ch)) {
+                $info = curl_getinfo($ch);
+                curl_close($ch);
+                return new Response($info, $result);
+            }
 
-		    $result = curl_exec($ch); 
+            $errno = curl_errno($ch);
+            $error = curl_error($ch);
 
-		    if(!curl_errno($ch)) {
-			 	$info = curl_getinfo($ch);
-			 	curl_close($ch);
-			 	return new Response($info, $result);
-			}
+            curl_close($ch);
 
-			$errno = curl_errno($ch);
-			$error = curl_error($ch);
+            throw new \Exception($error, $errno);
+        } else {
+            throw new \Exception("cURL support is required, but can't be found.", 1);
+        }
+    }
 
-		    curl_close($ch); 
+    public function get($api_method, $args = [], $timeout = 10)
+    {
+        return $this->makeRequest('get', $api_method, $args, $timeout);
+    }
 
-		    throw new \Exception($error, $errno);
-		}else{
-			throw new \Exception("cURL support is required, but can't be found.", 1);
-		}
-	}
+    public function delete($api_method, $args = [], $timeout = 10)
+    {
+        return $this->makeRequest('delete', $api_method, $args, $timeout);
+    }
+
+    public function disableSSLVerification()
+    {
+        $this->verify_ssl = false;
+    }
 }

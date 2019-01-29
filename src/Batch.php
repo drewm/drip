@@ -4,13 +4,14 @@ namespace DrewM\Drip;
 
 class Batch extends Dataset
 {
-	public function jsonSerialize() {
+    public function jsonSerialize()
+    {
         return [
-        	'batches' => [
-        		[
-		        	$this->label => $this->data
-		        ]
-	        ]
+            'batches' => [
+                [
+                    $this->label => $this->data,
+                ],
+            ],
         ];
     }
 

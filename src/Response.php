@@ -4,62 +4,63 @@ namespace DrewM\Drip;
 
 class Response
 {
-	public $status  = null;
-	public $error   = null;
-	public $message = null;
+    public $status  = null;
+    public $error   = null;
+    public $message = null;
 
-	protected $data   = [];
+    protected $data = [];
 
-	public function __construct($meta, $body)
-	{
-		$this->process_meta($meta);
-		$this->process_body($body);
-		$this->handle_errors();
-	}
+    public function __construct($meta, $body)
+    {
+        $this->process_meta($meta);
+        $this->process_body($body);
+        $this->handle_errors();
+    }
 
-	public function __get($name)
-	{
-		if (is_array($this->data) && isset($this->data[$name])) {
-			return $this->data[$name];
-		}
+    protected function process_meta($meta)
+    {
+        if (isset($meta['http_code'])) {
+            $this->status = (int) $meta['http_code'];
+        }
+    }
 
-		return false;
-	}
+    protected function process_body($body)
+    {
+        $decoded_body = json_decode($body, true);
+        if (is_array($decoded_body)) {
+            $this->data = $decoded_body;
+        }
+    }
 
-	public function get()
-	{
-		return $this->data;
-	}
+    protected function handle_errors()
+    {
+        if (is_array($this->data) && isset($this->data['errors'])) {
+            $this->error   = $this->data['errors'][0]['code'];
+            $this->message = $this->data['errors'][0]['message'];
+        }
+    }
 
-	public function __toString()
-	{
-		return print_r($this->data, true);
-	}
+    public function __get($name)
+    {
+        if (is_array($this->data) && isset($this->data[$name])) {
+            return $this->data[$name];
+        }
 
-	public function __debugInfo() {
-		return $this->data;
-	}
+        return false;
+    }
 
-	protected function process_meta($meta)
-	{
-		if (isset($meta['http_code'])) {
-			$this->status = (int) $meta['http_code'];	
-		}
-	}
+    public function get()
+    {
+        return $this->data;
+    }
 
-	protected function process_body($body)
-	{
-		$decoded_body = json_decode($body, true); 
-		if (is_array($decoded_body)) {
-			$this->data = $decoded_body;	
-		}
-	}
+    public function __toString()
+    {
+        return print_r($this->data, true);
+    }
 
-	protected function handle_errors()
-	{
-		if (is_array($this->data) && isset($this->data['errors'])) {
-			$this->error = $this->data['errors'][0]['code'];
-			$this->message = $this->data['errors'][0]['message'];
-		}
-	}
+    public function __debugInfo()
+    {
+        return $this->data;
+    }
 }
