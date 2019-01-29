@@ -13,7 +13,7 @@ class Dataset implements \JsonSerializable
         $this->data  = $data;
     }
 
-    public function jsonSerialize() : array
+    public function jsonSerialize()
     {
         return [
             $this->label => [
