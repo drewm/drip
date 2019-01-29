@@ -6,10 +6,10 @@ class Drip
 {
     protected static $eventSubscriptions = [];
     protected static $receivedWebhook    = false;
-    protected $api_endpoint = 'https://api.getdrip.com/v2';
-    protected $token      = false;
-    protected $accountID  = false;
-    protected $verify_ssl = true;
+    protected        $api_endpoint       = 'https://api.getdrip.com/v2';
+    protected        $token              = false;
+    protected        $accountID          = false;
+    protected        $verify_ssl         = true;
 
     public function __construct($token, $accountID)
     {
@@ -70,14 +70,38 @@ class Drip
         return false;
     }
 
-    public function post($api_method, $args, $timeout = 10)
+    /**
+     * Make a GET request
+     *
+     * @param string $api_method API method to call
+     * @param array  $args       API arguments
+     * @param int    $timeout    Connection timeout (seconds)
+     *
+     * @return Response
+     * @throws DripException
+     */
+    public function get($api_method, $args = [], $timeout = 10)
     {
-        return $this->makeRequest('post', $api_method, $args, $timeout);
+        return $this->makeRequest('get', $api_method, $args, $timeout);
     }
 
-    protected function makeRequest($http_verb = 'post', $api_method, $args = [], $timeout = 10)
+    /**
+     * Make the HTTP request
+     *
+     * @param string $http_verb  HTTP method used: get, post, delete
+     * @param string $api_method Drip API method to call
+     * @param array  $args       Array of arguments to the API method
+     * @param int    $timeout    Connection timeout (seconds)
+     * @param string $url        Optional URL to override the constructed one
+     *
+     * @return Response
+     * @throws DripException
+     */
+    protected function makeRequest($http_verb, $api_method, $args = [], $timeout = 10, $url = null) : Response
     {
-        $url = $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
+        if ($url === null) {
+            $url = $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
+        }
 
         if (function_exists('curl_init') && function_exists('curl_setopt')) {
 
@@ -124,17 +148,37 @@ class Drip
 
             curl_close($ch);
 
-            throw new \Exception($error, $errno);
+            throw new DripException($error, $errno);
         } else {
-            throw new \Exception("cURL support is required, but can't be found.", 1);
+            throw new DripException("cURL support is required, but can't be found.", 1);
         }
     }
 
-    public function get($api_method, $args = [], $timeout = 10)
+    /**
+     * Make a POST request
+     *
+     * @param string $api_method API method
+     * @param array  $args       Arguments to API method
+     * @param int    $timeout    Connection timeout (seconds)
+     *
+     * @return Response
+     * @throws DripException
+     */
+    public function post($api_method, $args = [], $timeout = 10)
     {
-        return $this->makeRequest('get', $api_method, $args, $timeout);
+        return $this->makeRequest('post', $api_method, $args, $timeout);
     }
 
+    /**
+     * Make a DELETE request
+     *
+     * @param string $api_method API method
+     * @param array  $args       Arguments to the API method
+     * @param int    $timeout    Connection timeout (seconds)
+     *
+     * @return Response
+     * @throws DripException
+     */
     public function delete($api_method, $args = [], $timeout = 10)
     {
         return $this->makeRequest('delete', $api_method, $args, $timeout);
