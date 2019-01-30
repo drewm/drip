@@ -38,7 +38,7 @@ class Drip
 
     public static function receiveWebhook($input = null)
     {
-        if (is_null($input)) {
+        if ($input === null) {
             if (self::$receivedWebhook !== false) {
                 $input = self::$receivedWebhook;
             } else {
@@ -84,7 +84,7 @@ class Drip
      *
      * @param string $accountID
      *
-     * @return bool
+     * @return void
      */
     public function setAccountId($accountID)
     {
@@ -123,20 +123,7 @@ class Drip
         $this->checkDependencies();
 
         $url = $this->constructRequestUrl($url, $api_method);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Accept: application/vnd.api+json',
-            'Content-Type: application/vnd.api+json',
-        ]);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'DrewM/Drip (github.com/drewm/drip)');
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD, $this->token . ': ');
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-        curl_setopt($ch, CURLOPT_URL, $url);
+        $ch  = $this->createCurlSession($url, $timeout);
 
         switch ($http_verb) {
             case 'post':
@@ -186,10 +173,9 @@ class Drip
         return true;
     }
 
-
     /**
      * @param string|null $url
-     * @param string $api_method
+     * @param string      $api_method
      *
      * @return string
      * @throws DripException
@@ -205,6 +191,33 @@ class Drip
         }
 
         return $this->api_endpoint . '/' . $this->accountID . '/' . $api_method;
+    }
+
+    /**
+     * Create a new CURL session (common setup etc)
+     *
+     * @param string $url
+     * @param int    $timeout
+     *
+     * @return false|resource
+     */
+    private function createCurlSession($url, $timeout = 10)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/vnd.api+json',
+            'Content-Type: application/vnd.api+json',
+        ]);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'DrewM/Drip (github.com/drewm/drip)');
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch, CURLOPT_USERPWD, $this->token . ': ');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verify_ssl);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        return $ch;
     }
 
     /**
