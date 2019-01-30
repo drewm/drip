@@ -86,10 +86,9 @@ class Drip
      *
      * @return bool
      */
-    public function setAccountId($accountID) : bool
+    public function setAccountId($accountID)
     {
         $this->accountID = $accountID;
-        return true;
     }
 
     /**
