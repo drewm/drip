@@ -184,11 +184,17 @@ class Drip
      * @param string $url
      * @param int    $timeout
      *
-     * @return false|resource
+     * @return resource
+     * @throws DripException
      */
     private function createCurlSession($url, $timeout = 10)
     {
         $ch = curl_init();
+
+        if (!$ch) {
+            throw new DripException("Unable to initialise curl", 3);
+        }
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/vnd.api+json',
