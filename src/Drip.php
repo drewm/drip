@@ -119,7 +119,7 @@ class Drip
      * @return Response
      * @throws DripException
      */
-    protected function makeRequest($http_verb, $api_method, $args = [], $timeout = 10, $url = null) : Response
+    protected function makeRequest($http_verb, $api_method, $args = [], $timeout = 10, $url = null)
     {
         $url = $this->constructRequestUrl($url, $api_method);
 
@@ -181,7 +181,7 @@ class Drip
      * @return string
      * @throws DripException
      */
-    private function constructRequestUrl($url, $api_method) : string
+    private function constructRequestUrl($url, $api_method)
     {
         if ($url !== null) {
             return $url;
