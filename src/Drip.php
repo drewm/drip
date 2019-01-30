@@ -132,8 +132,7 @@ class Drip
                 break;
 
             case 'get':
-                $query = http_build_query($args);
-                curl_setopt($ch, CURLOPT_URL, $url . '?' . $query);
+                curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($args));
                 break;
 
             case 'delete':
@@ -141,21 +140,7 @@ class Drip
                 break;
         }
 
-        $result = curl_exec($ch);
-
-        if (!curl_errno($ch)) {
-            $info = curl_getinfo($ch);
-            curl_close($ch);
-            return new Response($info, $result);
-        }
-
-        $errno = curl_errno($ch);
-        $error = curl_error($ch);
-
-        curl_close($ch);
-
-        throw new DripException($error, $errno);
-
+        return $this->executeRequest($ch);
     }
 
     /**
@@ -218,6 +203,32 @@ class Drip
         curl_setopt($ch, CURLOPT_URL, $url);
 
         return $ch;
+    }
+
+    /**
+     * Execute and handle the request result
+     *
+     * @param resource $ch Curl handle
+     *
+     * @return Response
+     * @throws DripException
+     */
+    private function executeRequest(&$ch)
+    {
+        $result = curl_exec($ch);
+
+        if (!curl_errno($ch)) {
+            $info = curl_getinfo($ch);
+            curl_close($ch);
+            return new Response($info, $result);
+        }
+
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+
+        throw new DripException($error, $errno);
     }
 
     /**
