@@ -41,6 +41,19 @@ List all subscribers:
 $Response = $Drip->get('subscribers');
 ```
 
+To request a method without an account ID in the URL, (e.g. list accounts) :
+
+```php
+$Drip = new Drip('abc123');
+$Response = $Drip->getGlobal('accounts');
+```
+
+To then subsequently set an account ID:
+
+```php
+$Drip->setAccountID('1234567');
+```
+
 ## Handling responses
 
 Methods return a Response object
