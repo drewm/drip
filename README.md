@@ -83,7 +83,7 @@ use DrewM\Drip\Drip;
 $data = Drip::receiveWebhook();
 ```
 
-If you prefer a pub/sub model, you can register listener callabales:
+If you prefer a pub/sub model, you can register listener callables:
 
 ```php
 use DrewM\Drip\Drip;
